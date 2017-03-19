@@ -67,12 +67,11 @@ object CurriedComputation extends Data {
 object FunctionalComputation extends  Data {
 
   def functionalComputation(filterData: String): (Array[String]) => Array[String] = {
+    //EMULATE HEAVY LOAD
+    Thread.sleep(10)
+    //PRODUCE WORDS ARRAY FROM A STRING
+    val filterArray = filterData.split(" ")
     (dataProducer: Array[String]) => {
-      //EMULATE HEAVY LOAD
-      Thread.sleep(10)
-      //PRODUCE WORDS ARRAY FROM A STRING
-      val filterArray = filterData.split(" ")
-
       //EMULATE HEAVY LOAD
       Thread.sleep(100)
       // LEAVE ONLY EQUAL WORDS IN BOTH ARRAYS

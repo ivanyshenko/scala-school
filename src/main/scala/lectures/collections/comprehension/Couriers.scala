@@ -24,9 +24,10 @@ case class Traffic(degree: Double)
 
 object Courier {
   def couriers(courierCount: Int): List[Courier] =
-    (for (i <- 1 to courierCount) yield {
-      Courier(i)
-    }).toList
+    List.tabulate(courierCount)(i => Courier(i))
+//    (for (i <- 1 to courierCount) yield {
+//      Courier(i)
+//    }).toList
 }
 
 case class Courier(index: Int) {
@@ -35,9 +36,10 @@ case class Courier(index: Int) {
 
 object Address {
   def addresses(addressesCount: Int): List[Address] =
-    (for (i <- 1 to addressesCount) yield {
-      Address(s"$i$i$i")
-    }).toList
+    List.tabulate(addressesCount)(i => Address(s"$i$i$i"))
+//    (for (i <- 1 to addressesCount) yield {
+//      Address(s"$i$i$i")
+//    }).toList
 }
 
 case class Address(postIndex: String)
@@ -55,23 +57,27 @@ object CouriersWithComprehension extends App {
 
   // какие адреса были обслужены
   def serveAddresses(addresses: List[Address], couriers: List[Courier]) = {
-    var accum = 0
-    for (courier <- couriers;
-         trafficDegree = traffic().degree;
-         t <- 0 to courier.canServe if trafficDegree < 5 && accum < addresses.length
-    ) yield {
-      val addr = addresses(accum)
-      accum = accum + 1
-      addr
-    }
+//    var accum = 0
+//    for (courier <- couriers;
+//         trafficDegree = traffic().degree;
+//         t <- 0 to courier.canServe if trafficDegree < 5 && accum < addresses.length
+//    ) yield {
+//      val addr = addresses(accum)
+//      accum = accum + 1
+//      addr
+//    }
+    addresses.take(couriers.filter(_ => traffic().degree < 5).foldLeft(0)((acc, c) => acc + c.canServe ))
   }
 
   def traffic(): Traffic = new Traffic(Math.random() * 10)
 
   def printServedAddresses(addresses: List[Address], couriers: List[Courier]) =
-    for (a <- serveAddresses(addresses, couriers)) {
-      println(a.postIndex)
-    }
+    serveAddresses(addresses, couriers).map(a => println(a.postIndex))
+//    for (a <- serveAddresses(addresses, couriers)) {
+//      println(a.postIndex)
+//    }
+
+
 
   printServedAddresses(addrs, cours)
 

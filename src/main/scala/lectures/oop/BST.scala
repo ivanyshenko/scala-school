@@ -1,5 +1,7 @@
 package lectures.oop
 
+import scala.annotation.tailrec
+
 
 /**
   * BSTImpl - это бинарное дерево поиска, содержащее только значения типа Int
@@ -36,13 +38,43 @@ case class BSTImpl(value: Int,
                    left: Option[BSTImpl] = None,
                    right: Option[BSTImpl] = None) extends BST {
 
-  def add(newValue: Int): BST = ???
+  def add(newValue: Int): BST = {
+    if (newValue == null) return null
 
-  def find(value: Int): Option[BST] = ???
+    def addImpl(value: Int, node: Option[BSTImpl]): Option[BSTImpl] = {
+      if (newValue < node.get.value)
+        if (node.get.left == None) Option(node.get.copy(left = Option(BSTImpl(newValue))))
+        else Option(node.get.copy(left = addImpl(newValue, node.get.left)))
+      else if (newValue > node.get.value)
+            if (node.get.right == None) Option(node.get.copy(right = Option(BSTImpl(newValue))))
+            else Option(node.get.copy(right = addImpl(newValue, node.get.right)))
+      else Option(this)
+    }
+    addImpl(newValue, Option(this)).get
+  }
 
-  // override def toString() = ???
+  def find(value: Int): Option[BST] = {
+    if (value == null) return null
+    @tailrec
+    def findImpl(value: Int, node: Option[BSTImpl]): Option[BSTImpl] = {
+      if (node.isEmpty) Option(null)
+      else if(node.get.value == value) node
+      else if(node.get.value > value) findImpl(value, node.get.left)
+      else findImpl(value, node.get.right)
+    }
+    findImpl(value, Option(this))
+  }
+
+   override def toString() = {
+     def toStringImpl(string: String, node:Option[BSTImpl]): String = {
+       if (node.isEmpty) string
+       else toStringImpl(string, node.get.left)+ " " + node.get.value + " " + toStringImpl(string, node.get.right)
+     }
+     toStringImpl("", Option(this))
+   }
 
 }
+
 
 object TreeTest extends App {
 
@@ -56,11 +88,11 @@ object TreeTest extends App {
 
   // Generate huge tree
   val root: BST = BSTImpl(maxValue / 2)
-  val tree: BST = ??? // generator goes here
+  val tree: BST = (1 to nodesCount).foldLeft(root)((acc, i) => acc.add(i))
 
   // add marker items
   val testTree = tree.add(markerItem).add(markerItem2).add(markerItem3)
-
+  println(testTree)
   // check that search is correct
   require(testTree.find(markerItem).isDefined)
   require(testTree.find(markerItem).isDefined)

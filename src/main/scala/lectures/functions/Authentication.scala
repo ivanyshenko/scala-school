@@ -26,7 +26,7 @@ import scala.util.Random
   *
   * Что-либо еще, кроме знаков ???, заменять нельзя
   */
-object Authentication extends App {
+object Authentication /*extends App*/ {
 
   import AuthenticationData._
 
@@ -38,13 +38,13 @@ object Authentication extends App {
     case user: LPUser if registeredLoginAndPassword.contains(user.credentials) => user
   }
 
-  val authenticated: List[Option[User]] = {
-    val lifted = (authByCard orElse authByLP).lift
-    for (user <- testUsers) yield {
-      lifted(user)
-    }
-  }
+//  val authenticated: List[Option[User]] = {
+//    val lifted = (authByCard orElse authByLP).lift
+//    for (user <- testUsers) yield {
+//      lifted(user)
+//    }
+//  }
 
-  authenticated.flatten foreach println
+  //authenticated.flatten foreach println
 
 }

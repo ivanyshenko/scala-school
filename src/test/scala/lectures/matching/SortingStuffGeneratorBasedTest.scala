@@ -58,6 +58,24 @@ class SortingStuffGeneratorBasedTest extends WordSpec with Matchers with Propert
       }
       }
     }
+    "proper named boots generator" in {
+      val boots = bootGenerator
+      forAll(boots) { (boots: Boots) => {
+        boots.size should be  <= 50
+        boots.size should be  >= 40
+        assert((boots.brand == "Converse")||(boots.brand == "Adidas"))
+      }
+      }
+    }
+    "proper nonamed boots generator" in {
+      val boots = noNameBootGenerator
+      forAll(boots) { (boots: Boots) => {
+        boots.size should be  <= 50
+        boots.size should be  >= 40
+      }
+      }
+    }
+
   }
 
   "Sort stuff" should {

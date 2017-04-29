@@ -41,23 +41,23 @@ case class BSTImpl(value: Int,
   def add(newValue: Int): BST = {
     if (newValue == null) return null
 
-    def addImpl(value: Int, node: Option[BSTImpl]): Option[BSTImpl] = {
+    def addImpl(value: Int, node: Option[BSTImpl]): BSTImpl = {
       if (newValue < node.get.value)
-        if (node.get.left == None) Option(node.get.copy(left = Option(BSTImpl(newValue))))
-        else Option(node.get.copy(left = addImpl(newValue, node.get.left)))
+        if (node.get.left == None) node.get.copy(left = Option(BSTImpl(newValue)))
+        else node.get.copy(left = Option(addImpl(newValue, node.get.left)))
       else if (newValue > node.get.value)
-            if (node.get.right == None) Option(node.get.copy(right = Option(BSTImpl(newValue))))
-            else Option(node.get.copy(right = addImpl(newValue, node.get.right)))
-      else Option(this)
+            if (node.get.right == None) node.get.copy(right = Option(BSTImpl(newValue)))
+            else node.get.copy(right = Option(addImpl(newValue, node.get.right)))
+      else this
     }
-    addImpl(newValue, Option(this)).get
+    addImpl(newValue, Option(this))
   }
 
   def find(value: Int): Option[BST] = {
     if (value == null) return null
     @tailrec
     def findImpl(value: Int, node: Option[BSTImpl]): Option[BSTImpl] = {
-      if (node.isEmpty) Option(null)
+      if (node.isEmpty) None
       else if(node.get.value == value) node
       else if(node.get.value > value) findImpl(value, node.get.left)
       else findImpl(value, node.get.right)

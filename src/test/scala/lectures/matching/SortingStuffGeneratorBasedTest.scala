@@ -1,6 +1,6 @@
 package lectures.matching
 
-import lectures.matching.SortingStuff.{Book, StuffBox, Watches}
+import lectures.matching.SortingStuff._
 import org.scalacheck.Gen
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{Matchers, WordSpec}
@@ -34,6 +34,9 @@ class SortingStuffGeneratorBasedTest extends WordSpec with Matchers with Propert
   val cheepWatchGen: Gen[Watches] = Gen.zip(Gen.choose(0f, 1000f), Gen.alphaStr).map(w => Watches(w._2, w._1))
   val bookGenerator = Gen.alphaStr.map(name => Book(name, Random.nextBoolean()))
   val interestingBookGen = bookGenerator.filter(_.isInteresting)
+  val knifeGenerator: Gen[Option[Stuff]] = Gen.option(Knife)
+  val bootGenerator: Gen[Boots] = Gen.zip(Gen.oneOf(Gen.const("Converse"), Gen.const("Adidas"), Gen.alphaStr), Gen.choose(40, 50)).map(i => Boots(i._1, i._2))
+  val noNameBootGenerator: Gen[Boots] = Gen.zip(Gen.alphaStr, Gen.choose(40, 50)).map(i => Boots(i._1, i._2))
 
   // Override configuration if you need
   implicit override val generatorDrivenConfig =
@@ -55,6 +58,24 @@ class SortingStuffGeneratorBasedTest extends WordSpec with Matchers with Propert
       }
       }
     }
+    "proper named boots generator" in {
+      val boots = bootGenerator
+      forAll(boots) { (boots: Boots) => {
+        boots.size should be  <= 50
+        boots.size should be  >= 40
+        assert((boots.brand == "Converse")||(boots.brand == "Adidas"))
+      }
+      }
+    }
+    "proper nonamed boots generator" in {
+      val boots = noNameBootGenerator
+      forAll(boots) { (boots: Boots) => {
+        boots.size should be  <= 50
+        boots.size should be  >= 40
+      }
+      }
+    }
+
   }
 
   "Sort stuff" should {
@@ -72,11 +93,28 @@ class SortingStuffGeneratorBasedTest extends WordSpec with Matchers with Propert
       }
     }
     "find knife" which {
-      "was occasionally disposed" in pending
+      "was occasionally disposed" in {
+        knifeGenerator.sample.get match {
+          case Some(k) =>
+            findMyKnife(SortingStuff.sortJunk(List(k))) shouldBe true
+          case None =>
+            findMyKnife(SortingStuff.sortJunk(List())) shouldBe false
+        }
+      }
     }
 
     "put boots in a proper place" when {
-      "boots were produced by Converse or Adidas" in pending
+      "boots were produced by Converse or Adidas" in {
+        val ms = generatorDrivenConfig.minSuccessful
+
+        val noNameBoots = (1 to ms) flatMap { _ => noNameBootGenerator.sample }
+        val goodBoots = (1 to ms) flatMap { _ => bootGenerator.sample }
+
+        val StuffBox(_, _, namedBoots, junk) = SortingStuff.sortJunk(Random.shuffle(noNameBoots ++ goodBoots).toList)
+
+        namedBoots should have size goodBoots.size
+        junk should have size noNameBoots.size
+      }
     }
   }
 }

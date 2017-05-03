@@ -66,13 +66,13 @@ object CouriersWithComprehension extends App {
 //      accum = accum + 1
 //      addr
 //    }
-    addresses.take(couriers.filter(_ => traffic().degree < 5).foldLeft(0)((acc, c) => acc + c.canServe ))
+    addresses.take(couriers.filter(_ => traffic().degree < 5).map(_.canServe).sum)
   }
 
   def traffic(): Traffic = new Traffic(Math.random() * 10)
 
   def printServedAddresses(addresses: List[Address], couriers: List[Courier]) =
-    serveAddresses(addresses, couriers).map(a => println(a.postIndex))
+    serveAddresses(addresses, couriers).foreach( a => println(a.postIndex))
 //    for (a <- serveAddresses(addresses, couriers)) {
 //      println(a.postIndex)
 //    }

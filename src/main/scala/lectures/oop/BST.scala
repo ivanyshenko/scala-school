@@ -1,7 +1,7 @@
 package lectures.oop
 
 import scala.annotation.tailrec
-
+import scala.math.pow
 
 /**
   * BSTImpl - это бинарное дерево поиска, содержащее только значения типа Int
@@ -41,23 +41,23 @@ case class BSTImpl(value: Int,
   def add(newValue: Int): BST = {
     if (newValue == null) return null
 
-    def addImpl(value: Int, node: Option[BSTImpl]): Option[BSTImpl] = {
+    def addImpl(value: Int, node: Option[BSTImpl]): BSTImpl = {
       if (newValue < node.get.value)
-        if (node.get.left == None) Option(node.get.copy(left = Option(BSTImpl(newValue))))
-        else Option(node.get.copy(left = addImpl(newValue, node.get.left)))
+        if (node.get.left == None) node.get.copy(left = Option(BSTImpl(newValue)))
+        else node.get.copy(left = Option(addImpl(newValue, node.get.left)))
       else if (newValue > node.get.value)
-            if (node.get.right == None) Option(node.get.copy(right = Option(BSTImpl(newValue))))
-            else Option(node.get.copy(right = addImpl(newValue, node.get.right)))
-      else Option(this)
+            if (node.get.right == None) node.get.copy(right = Option(BSTImpl(newValue)))
+            else node.get.copy(right = Option(addImpl(newValue, node.get.right)))
+      else this
     }
-    addImpl(newValue, Option(this)).get
+    addImpl(newValue, Option(this))
   }
 
   def find(value: Int): Option[BST] = {
     if (value == null) return null
     @tailrec
     def findImpl(value: Int, node: Option[BSTImpl]): Option[BSTImpl] = {
-      if (node.isEmpty) Option(null)
+      if (node.isEmpty) None
       else if(node.get.value == value) node
       else if(node.get.value > value) findImpl(value, node.get.left)
       else findImpl(value, node.get.right)
@@ -65,21 +65,52 @@ case class BSTImpl(value: Int,
     findImpl(value, Option(this))
   }
 
-   override def toString() = {
-     def toStringImpl(string: String, node:Option[BSTImpl]): String = {
-       if (node.isEmpty) string
-       else toStringImpl(string, node.get.left)+ " " + node.get.value + " " + toStringImpl(string, node.get.right)
-     }
-     toStringImpl("", Option(this))
-   }
 
+  override def toString() = {
+    def getChildren(node:Option[BSTImpl]): List[Option[BSTImpl]] = {
+      if (node.isEmpty) List(None, None)
+      else List(node.get.left, node.get.right)
+    }
+    def getNextLevel(nodes:List[Option[BSTImpl]]): List[Option[BSTImpl]] ={
+      if (!nodes.exists(_.nonEmpty)) List()
+      else nodes.flatMap(getChildren)
+    }
+    def foldLeftOp(n:Int): (String, Option[BSTImpl]) => String = {
+      val drawback:Int = (math.pow(2,n) - 1).toInt
+      def foldLeft(acc: String, node: Option[BSTImpl]): String = {
+        node match {
+          case None => acc + " " * drawback + "-1"
+          case _ => acc + " " * drawback + node.get.value
+        }
+      }
+      foldLeft
+    }
+
+    def toStringImpl(nodes: List[Option[BSTImpl]]): (String, Int) = {
+      if (nodes.isEmpty) ("", 0)
+      else {
+        val (str, level) = toStringImpl(getNextLevel(nodes))
+        (nodes.foldLeft("")(foldLeftOp(level + 1)) + "\n" + str, level + 1)
+      }
+    }
+    toStringImpl(List(Option(this)))_1
+  }
 }
+/* result looks like:
+                               5500
+               1               7644
+       -1       2988       -1       -1
+   -1   -1   114   -1   -1   -1   -1   -1
+ -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+ */
+
+
 
 
 object TreeTest extends App {
 
   val sc = new java.util.Scanner(System.in)
-  val maxValue = 110000
+  val maxValue = 11000
   val nodesCount = sc.nextInt()
 
   val markerItem = (Math.random() * maxValue).toInt

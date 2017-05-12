@@ -34,31 +34,27 @@ case class GeneralBSTImpl[T: Ordering](value: T,
   val ord: Ordering[T] = implicitly[Ordering[T]]
   import ord._
 
-  override def find(value: T): Option[GeneralBSTImpl[T]] = {
-    if (value == null) return null
-    findImpl(value, Option(this))
-  }
+  override def find(value: T): Option[GeneralBSTImpl[T]] = Option(value).flatMap(v => findImpl(v, Option(this)))
 
-  override def add(newValue: T): GeneralBSTImpl[T] = {
-    if (newValue == null) return null
-    addImpl(newValue, Option(this))
-  }
+  override def add(newValue: T): GeneralBSTImpl[T] = Option(newValue).map(v => addImpl(v, this)).get
 
-  def addImpl(newValue: T, node: Option[GeneralBSTImpl[T]]): GeneralBSTImpl[T] = {
-    if (newValue < node.get.value)
-      if (node.get.left == None) node.get.copy(left = Option(GeneralBSTImpl(newValue)))
-      else node.get.copy(left = Option(addImpl(newValue, node.get.left)))
-    else if (newValue > node.get.value)
-      if (node.get.right == None) node.get.copy(right = Option(GeneralBSTImpl(newValue)))
-      else node.get.copy(right = Option(addImpl(newValue, node.get.right)))
+  def addImpl(newValue: T, node: GeneralBSTImpl[T]): GeneralBSTImpl[T] = {
+    if (newValue < node.value)
+      if (node.left.isEmpty) node.copy(left = Option(GeneralBSTImpl(newValue)))
+      else node.copy(left = Option(addImpl(newValue, node.left.get)))
+    else if (newValue > node.value)
+      if (node.right.isEmpty) node.copy(right = Option(GeneralBSTImpl(newValue)))
+      else node.copy(right = Option(addImpl(newValue, node.right.get)))
     else this
   }
 
   def findImpl(value: T, node: Option[GeneralBSTImpl[T]]): Option[GeneralBSTImpl[T]] = {
-    if (node.isEmpty) None
-    else if(node.get.value == value) node
-    else if(node.get.value > value) findImpl(value, node.get.left)
-    else findImpl(value, node.get.right)
+    node match {
+      case None => None
+      case Some(n) if n.value == value => node
+      case Some(n) if n.value > value => findImpl(value, node.get.left)
+      case Some(n) if n.value < value => findImpl(value, node.get.right)
+    }
   }
 }
 

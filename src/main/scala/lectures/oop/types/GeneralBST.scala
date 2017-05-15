@@ -40,11 +40,9 @@ case class GeneralBSTImpl[T: Ordering](value: T,
 
   def addImpl(newValue: T, node: GeneralBSTImpl[T]): GeneralBSTImpl[T] = {
     if (newValue < node.value)
-      if (node.left.isEmpty) node.copy(left = Option(GeneralBSTImpl(newValue)))
-      else node.copy(left = Option(addImpl(newValue, node.left.get)))
+      node.left map {l => node.copy(left = Option(addImpl(newValue, l)))} getOrElse node.copy(left = Option(GeneralBSTImpl(newValue)))
     else if (newValue > node.value)
-      if (node.right.isEmpty) node.copy(right = Option(GeneralBSTImpl(newValue)))
-      else node.copy(right = Option(addImpl(newValue, node.right.get)))
+      node.right map {l => node.copy(right = Option(addImpl(newValue, l)))} getOrElse node.copy(right = Option(GeneralBSTImpl(newValue)))
     else this
   }
 
